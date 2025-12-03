@@ -140,6 +140,11 @@ class BrandDataProcessor:
         """
         Prepare data for GAN training.
 
+        Handles companies with only one brand by:
+        1. Identifying single-brand companies
+        2. Performing stratified split only on multi-brand companies
+        3. Adding all single-brand companies to the training set
+
         Args:
             test_size: Fraction of data to use for validation
 
@@ -172,13 +177,40 @@ class BrandDataProcessor:
         self.label_encoders['company_name'] = le_company
         print(f"  Encoded company_name: {len(le_company.classes_)} companies")
 
-        # Split data (stratified by company to ensure each company in train/val)
-        train_df, val_df = train_test_split(
-            df_gan,
-            test_size=test_size,
-            stratify=df_gan['company_name'],
-            random_state=42
-        )
+        # Identify companies with only one brand (after encoding)
+        company_counts = df_gan['company_name'].value_counts()
+        single_brand_company_ids = company_counts[company_counts == 1].index
+
+        # Separate single-brand companies from multi-brand companies
+        df_single_brand = df_gan[df_gan['company_name'].isin(single_brand_company_ids)]
+        df_multi_brand = df_gan[~df_gan['company_name'].isin(single_brand_company_ids)]
+
+        # Initialize empty DataFrames with proper columns
+        train_df = pd.DataFrame(columns=df_gan.columns)
+        val_df = pd.DataFrame(columns=df_gan.columns)
+
+        # Perform stratified split on multi-brand companies
+        if not df_multi_brand.empty:
+            train_multi, val_multi = train_test_split(
+                df_multi_brand,
+                test_size=test_size,
+                random_state=42,
+                stratify=df_multi_brand['company_name']
+            )
+            train_df = pd.concat([train_df, train_multi], ignore_index=True)
+            val_df = pd.concat([val_df, val_multi], ignore_index=True)
+        else:
+            print("No multi-brand companies for stratified split.")
+
+        # Add single-brand companies to the training set
+        if not df_single_brand.empty:
+            train_df = pd.concat([train_df, df_single_brand], ignore_index=True)
+            print(f"Added {len(df_single_brand)} single-brand companies to training set.")
+        else:
+            print("No single-brand companies to add.")
+
+        # Shuffle the combined training set
+        train_df = train_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
         print(f"\nTrain set: {len(train_df)} brands")
         print(f"Validation set: {len(val_df)} brands")

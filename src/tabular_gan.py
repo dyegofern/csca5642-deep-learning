@@ -89,9 +89,15 @@ class TabularBrandGAN:
 
         if condition_column and condition_value is not None:
             print(f"Conditioning on {condition_column} = {condition_value}")
-            conditions = pd.DataFrame({condition_column: [condition_value] * n_samples})
-            synthetic_data = self.model.sample_from_conditions(
-                conditions=conditions
+
+            # Use sample_remaining_columns for efficient conditional generation
+            # This is the correct SDV API for conditional sampling
+            conditions = pd.DataFrame({
+                condition_column: [condition_value] * n_samples
+            })
+
+            synthetic_data = self.model.sample_remaining_columns(
+                known_columns=conditions
             )
         else:
             print("Generating unconditionally...")
