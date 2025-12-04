@@ -107,6 +107,18 @@ class TabularBrandGAN:
             print("Generating unconditionally...")
             synthetic_data = self.model.sample(num_rows=n_samples)
 
+        # Remove SDV internal ID columns (they have 'sdv-id-' prefix in values)
+        cols_to_drop = []
+        for col in synthetic_data.columns:
+            if synthetic_data[col].dtype == 'object':
+                # Check if any values start with 'sdv-id-'
+                sample_vals = synthetic_data[col].astype(str).head(10)
+                if sample_vals.str.startswith('sdv-id-').any():
+                    cols_to_drop.append(col)
+        if cols_to_drop:
+            synthetic_data = synthetic_data.drop(columns=cols_to_drop)
+            print(f"Removed SDV internal columns: {cols_to_drop}")
+
         print(f"Generated {len(synthetic_data)} synthetic samples")
         return synthetic_data
 
