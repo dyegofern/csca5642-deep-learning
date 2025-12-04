@@ -70,7 +70,7 @@ class TabularBrandGAN:
         print("Training completed!")
 
     def generate(self, n_samples: int, condition_column: Optional[str] = None,
-                 condition_value: Optional[any] = None) -> pd.DataFrame:
+                 condition_value: Optional[any] = None, max_tries: int = 100) -> pd.DataFrame:
         """
         Generate synthetic data in a single efficient batch.
 
@@ -78,9 +78,13 @@ class TabularBrandGAN:
             n_samples: Number of samples to generate
             condition_column: Column to condition on (e.g., 'company_name')
             condition_value: Value to condition on (e.g., 156 for Nestle)
+            max_tries: Maximum tries per batch for conditional sampling
 
         Returns:
             Dataframe of synthetic brand features
+
+        Raises:
+            ValueError: If generation fails (caller should handle this)
         """
         if self.model is None:
             raise ValueError("Model not trained yet. Call train() first.")
@@ -96,7 +100,8 @@ class TabularBrandGAN:
             })
 
             synthetic_data = self.model.sample_remaining_columns(
-                known_columns=conditions_df
+                known_columns=conditions_df,
+                max_tries_per_batch=max_tries
             )
         else:
             print("Generating unconditionally...")
@@ -147,42 +152,72 @@ class TabularBrandGAN:
         return combined
 
     def generate_stratified(self, company_distribution: Dict[any, int],
-                          verbose: bool = True) -> pd.DataFrame:
+                          verbose: bool = True, max_tries: int = 100) -> tuple[pd.DataFrame, Dict]:
         """
-        Generate brands with custom distribution per company.
+        Generate brands with custom distribution per company with error handling.
 
         Args:
             company_distribution: Dict mapping company_id -> number of brands to generate
             verbose: Print progress
+            max_tries: Maximum tries per batch for conditional sampling
 
         Returns:
-            Dataframe of synthetic brands
+            Tuple of (dataframe of synthetic brands, dict of failed companies with error messages)
         """
         if verbose:
             print(f"\n=== Stratified Generation ===")
             print(f"  Companies: {len(company_distribution)}")
-            print(f"  Total brands: {sum(company_distribution.values())}")
+            print(f"  Total brands requested: {sum(company_distribution.values())}")
 
         all_synthetic = []
+        failed_companies = {}
+        successful_count = 0
+        failed_count = 0
 
         for i, (company, n_brands) in enumerate(company_distribution.items()):
             if verbose and (i + 1) % 10 == 0:
-                print(f"  Progress: {i + 1}/{len(company_distribution)} companies...")
+                print(f"  Progress: {i + 1}/{len(company_distribution)} companies (Success: {successful_count}, Failed: {failed_count})...")
 
             if n_brands > 0:
-                synthetic = self.generate(
-                    n_samples=n_brands,
-                    condition_column=self.condition_column,
-                    condition_value=company
-                )
-                all_synthetic.append(synthetic)
+                try:
+                    synthetic = self.generate(
+                        n_samples=n_brands,
+                        condition_column=self.condition_column,
+                        condition_value=company,
+                        max_tries=max_tries
+                    )
+                    all_synthetic.append(synthetic)
+                    successful_count += 1
+                except ValueError as e:
+                    failed_count += 1
+                    error_msg = str(e)
+                    failed_companies[company] = error_msg
+                    if verbose:
+                        print(f"  ⚠ WARNING: Failed to generate for company {company}: {error_msg[:80]}...")
+                except Exception as e:
+                    failed_count += 1
+                    error_msg = f"Unexpected error: {str(e)}"
+                    failed_companies[company] = error_msg
+                    if verbose:
+                        print(f"  ⚠ WARNING: Unexpected error for company {company}: {str(e)[:80]}...")
 
-        combined = pd.concat(all_synthetic, ignore_index=True)
+        if all_synthetic:
+            combined = pd.concat(all_synthetic, ignore_index=True)
+        else:
+            # Return empty dataframe with correct structure if all failed
+            combined = pd.DataFrame()
 
         if verbose:
-            print(f"\n✓ Generated {len(combined)} synthetic brands")
+            print(f"\n{'='*60}")
+            print(f"Generation Summary:")
+            print(f"  ✓ Successful: {successful_count} companies")
+            print(f"  ✗ Failed: {failed_count} companies")
+            print(f"  Total brands generated: {len(combined)}")
+            if failed_companies:
+                print(f"\n⚠ Failed companies will be logged for review")
+            print(f"{'='*60}")
 
-        return combined
+        return combined, failed_companies
 
     def add_diversity_noise(self, synthetic_data: pd.DataFrame,
                            noise_level: float = 0.02,

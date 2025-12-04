@@ -26,6 +26,9 @@ scipy>=1.10.0                 # KS tests, chi-square, hierarchical clustering
 tqdm>=4.65.0                  # Progress bars
 datasets>=2.12.0              # HuggingFace datasets (for GPT-2 training)
 
+# Google Colab (pre-installed in Colab, only needed for local development)
+# google-colab                # For Google Drive integration (auto-installed in Colab)
+
 # Optional (for advanced features)
 # wandb>=0.15.0               # Experiment tracking
 # optuna>=3.2.0               # Advanced hyperparameter optimization
