@@ -31,13 +31,15 @@ class TabularBrandGAN:
         self.metadata = None
         self.condition_column = 'company_name'
 
-    def train(self, data: pd.DataFrame, discrete_columns: List[str] = None):
+    def train(self, data: pd.DataFrame, discrete_columns: List[str] = None,
+              binary_columns: List[str] = None):
         """
         Train the CTGAN model on brand data.
 
         Args:
             data: Training dataframe
             discrete_columns: List of categorical column names
+            binary_columns: List of binary (0/1) column names to be treated as categorical
         """
         try:
             from sdv.single_table import CTGANSynthesizer
@@ -55,6 +57,16 @@ class TabularBrandGAN:
         # Create metadata
         self.metadata = SingleTableMetadata()
         self.metadata.detect_from_dataframe(data)
+
+        # Update binary columns to be treated as categorical (boolean)
+        if binary_columns:
+            print(f"Setting {len(binary_columns)} binary columns as boolean type...")
+            for col in binary_columns:
+                if col in data.columns:
+                    self.metadata.update_column(
+                        column_name=col,
+                        sdtype='boolean'
+                    )
 
         # Initialize CTGAN
         self.model = CTGANSynthesizer(
