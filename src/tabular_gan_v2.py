@@ -208,6 +208,26 @@ class BaseSynthesizerWrapper(ABC):
             data = data.drop(columns=cols_to_drop)
         return data
 
+    def _convert_binary_to_bool(self, data: pd.DataFrame, binary_columns: List[str]) -> pd.DataFrame:
+        """Convert binary 0/1 columns to actual boolean True/False for SDV."""
+        data = data.copy()
+        if binary_columns:
+            for col in binary_columns:
+                if col in data.columns:
+                    # Convert 0/1 to True/False
+                    data[col] = data[col].astype(bool)
+        return data
+
+    def _convert_bool_to_binary(self, data: pd.DataFrame, binary_columns: List[str]) -> pd.DataFrame:
+        """Convert boolean True/False back to 0/1 integers."""
+        data = data.copy()
+        if binary_columns:
+            for col in binary_columns:
+                if col in data.columns:
+                    # Convert True/False back to 1/0
+                    data[col] = data[col].astype(int)
+        return data
+
 
 class CTGANSynthesizerWrapper(BaseSynthesizerWrapper):
     """Wrapper for CTGAN from SDV library."""
@@ -244,6 +264,7 @@ class CTGANSynthesizerWrapper(BaseSynthesizerWrapper):
         self.discriminator_lr = discriminator_lr
         self.cuda = cuda
         self.model_type = 'ctgan'
+        self._binary_columns = []  # Store for conversion back after generation
 
     def train(self, data: pd.DataFrame, discrete_columns: List[str] = None,
               binary_columns: List[str] = None) -> None:
@@ -255,14 +276,23 @@ class CTGANSynthesizerWrapper(BaseSynthesizerWrapper):
             print(f"\n=== Training CTGAN ===")
             print(f"Training on {len(data)} samples with {len(data.columns)} features")
 
+        # Store binary columns for later conversion
+        self._binary_columns = binary_columns or []
+
+        # Convert binary 0/1 to actual boolean True/False for SDV
+        if binary_columns:
+            if self.verbose:
+                print(f"Converting {len(binary_columns)} binary columns to boolean...")
+            data = self._convert_binary_to_bool(data, binary_columns)
+
         # Create metadata
         self.metadata = SingleTableMetadata()
         self.metadata.detect_from_dataframe(data)
 
-        # Update binary columns to boolean type
+        # Update binary columns to boolean type in metadata
         if binary_columns:
             if self.verbose:
-                print(f"Setting {len(binary_columns)} binary columns as boolean type...")
+                print(f"Setting {len(binary_columns)} binary columns as boolean type in metadata...")
             for col in binary_columns:
                 if col in data.columns:
                     self.metadata.update_column(column_name=col, sdtype='boolean')
@@ -307,7 +337,14 @@ class CTGANSynthesizerWrapper(BaseSynthesizerWrapper):
         else:
             synthetic_data = self.model.sample(num_rows=n_samples)
 
-        return self._remove_sdv_columns(synthetic_data)
+        # Remove SDV internal columns
+        synthetic_data = self._remove_sdv_columns(synthetic_data)
+
+        # Convert boolean columns back to 0/1 integers
+        if self._binary_columns:
+            synthetic_data = self._convert_bool_to_binary(synthetic_data, self._binary_columns)
+
+        return synthetic_data
 
     def save_model(self, filepath: str) -> None:
         """Save the trained CTGAN model."""
@@ -362,6 +399,7 @@ class TVAESynthesizerWrapper(BaseSynthesizerWrapper):
         self.loss_factor = loss_factor
         self.cuda = cuda
         self.model_type = 'tvae'
+        self._binary_columns = []  # Store for conversion back after generation
 
     def train(self, data: pd.DataFrame, discrete_columns: List[str] = None,
               binary_columns: List[str] = None) -> None:
@@ -373,14 +411,23 @@ class TVAESynthesizerWrapper(BaseSynthesizerWrapper):
             print(f"\n=== Training TVAE ===")
             print(f"Training on {len(data)} samples with {len(data.columns)} features")
 
+        # Store binary columns for later conversion
+        self._binary_columns = binary_columns or []
+
+        # Convert binary 0/1 to actual boolean True/False for SDV
+        if binary_columns:
+            if self.verbose:
+                print(f"Converting {len(binary_columns)} binary columns to boolean...")
+            data = self._convert_binary_to_bool(data, binary_columns)
+
         # Create metadata
         self.metadata = SingleTableMetadata()
         self.metadata.detect_from_dataframe(data)
 
-        # Update binary columns to boolean type
+        # Update binary columns to boolean type in metadata
         if binary_columns:
             if self.verbose:
-                print(f"Setting {len(binary_columns)} binary columns as boolean type...")
+                print(f"Setting {len(binary_columns)} binary columns as boolean type in metadata...")
             for col in binary_columns:
                 if col in data.columns:
                     self.metadata.update_column(column_name=col, sdtype='boolean')
@@ -425,7 +472,14 @@ class TVAESynthesizerWrapper(BaseSynthesizerWrapper):
         else:
             synthetic_data = self.model.sample(num_rows=n_samples)
 
-        return self._remove_sdv_columns(synthetic_data)
+        # Remove SDV internal columns
+        synthetic_data = self._remove_sdv_columns(synthetic_data)
+
+        # Convert boolean columns back to 0/1 integers
+        if self._binary_columns:
+            synthetic_data = self._convert_bool_to_binary(synthetic_data, self._binary_columns)
+
+        return synthetic_data
 
     def save_model(self, filepath: str) -> None:
         """Save the trained TVAE model."""
@@ -469,6 +523,7 @@ class GaussianCopulaSynthesizerWrapper(BaseSynthesizerWrapper):
         self.default_distribution = default_distribution
         self.numerical_distributions = numerical_distributions or {}
         self.model_type = 'gaussian_copula'
+        self._binary_columns = []  # Store for conversion back after generation
 
     def train(self, data: pd.DataFrame, discrete_columns: List[str] = None,
               binary_columns: List[str] = None) -> None:
@@ -485,14 +540,23 @@ class GaussianCopulaSynthesizerWrapper(BaseSynthesizerWrapper):
             print(f"\n=== Training Gaussian Copula ===")
             print(f"Training on {len(data)} samples with {len(data.columns)} features")
 
+        # Store binary columns for later conversion
+        self._binary_columns = binary_columns or []
+
+        # Convert binary 0/1 to actual boolean True/False for SDV
+        if binary_columns:
+            if self.verbose:
+                print(f"Converting {len(binary_columns)} binary columns to boolean...")
+            data = self._convert_binary_to_bool(data, binary_columns)
+
         # Create metadata
         self.metadata = SingleTableMetadata()
         self.metadata.detect_from_dataframe(data)
 
-        # Update binary columns to boolean type
+        # Update binary columns to boolean type in metadata
         if binary_columns:
             if self.verbose:
-                print(f"Setting {len(binary_columns)} binary columns as boolean type...")
+                print(f"Setting {len(binary_columns)} binary columns as boolean type in metadata...")
             for col in binary_columns:
                 if col in data.columns:
                     self.metadata.update_column(column_name=col, sdtype='boolean')
@@ -530,7 +594,14 @@ class GaussianCopulaSynthesizerWrapper(BaseSynthesizerWrapper):
         else:
             synthetic_data = self.model.sample(num_rows=n_samples)
 
-        return self._remove_sdv_columns(synthetic_data)
+        # Remove SDV internal columns
+        synthetic_data = self._remove_sdv_columns(synthetic_data)
+
+        # Convert boolean columns back to 0/1 integers
+        if self._binary_columns:
+            synthetic_data = self._convert_bool_to_binary(synthetic_data, self._binary_columns)
+
+        return synthetic_data
 
     def get_learned_distributions(self) -> Dict:
         """Get the learned marginal distributions for each column."""
