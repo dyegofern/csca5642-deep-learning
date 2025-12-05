@@ -264,10 +264,8 @@ class GPT2BrandModel(BaseBrandModel):
             print(f"Loading {self.config.model_name}...")
 
         self.tokenizer = GPT2Tokenizer.from_pretrained(self.config.model_name)
-        self.model = GPT2LMHeadModel.from_pretrained(
-            self.config.model_name,
-            torch_dtype=torch.float16 if self.config.torch_dtype == 'float16' else torch.float32
-        )
+        # Load in FP32 - let Trainer handle FP16 during training
+        self.model = GPT2LMHeadModel.from_pretrained(self.config.model_name)
 
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -403,10 +401,8 @@ class T5BrandModel(BaseBrandModel):
             print(f"Loading {self.config.model_name}...")
 
         self.tokenizer = T5Tokenizer.from_pretrained(self.config.model_name)
-        self.model = T5ForConditionalGeneration.from_pretrained(
-            self.config.model_name,
-            torch_dtype=torch.float16 if self.config.torch_dtype == 'float16' else torch.float32
-        )
+        # Load in FP32 - let Trainer handle FP16 during training
+        self.model = T5ForConditionalGeneration.from_pretrained(self.config.model_name)
 
         if self.config.use_gradient_checkpointing:
             self.model.gradient_checkpointing_enable()
