@@ -1,0 +1,16 @@
+\beamer@sectionintoc {1}{Synthetic Brand Generation V2 - Enhanced with Ensemble Methods}{3}{0}{1}
+\beamer@sectionintoc {2}{Problem Statement}{4}{0}{2}
+\beamer@sectionintoc {3}{ML Approach & Architecture}{7}{0}{3}
+\beamer@sectionintoc {4}{Phase 1: Setup & Installation}{12}{0}{4}
+\beamer@sectionintoc {5}{Configuration}{14}{0}{5}
+\beamer@sectionintoc {6}{Phase 0: Hyperparameter Tuning (Optional)}{15}{0}{6}
+\beamer@sectionintoc {7}{Phase 1: Data Preparation}{19}{0}{7}
+\beamer@sectionintoc {8}{Phase 2: Tabular Ensemble Training}{25}{0}{8}
+\beamer@sectionintoc {9}{Phase 3: LLM Ensemble Training}{30}{0}{9}
+\beamer@sectionintoc {10}{Phase 4: Synthetic Data Generation}{35}{0}{10}
+\beamer@sectionintoc {11}{Phase 5: Synthetic Data Quality Evaluation}{42}{0}{11}
+\beamer@sectionintoc {12}{Clean Up}{78}{0}{12}
+\beamer@sectionintoc {13}{Conclusion}{78}{0}{13}
+\beamer@sectionintoc {14}{References & Bibliography}{81}{0}{14}
+\beamer@sectionintoc {15}{Appendix - Mermeid Code}{88}{0}{15}
+\beamer@sectionintoc {16}{Tools & Libraries Used}{91}{0}{16}

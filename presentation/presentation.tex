@@ -1,0 +1,981 @@
+\documentclass[aspectratio=169]{beamer}
+
+% Theme and Color Scheme
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% University of Colorado Boulder Colors
+\definecolor{PrimaryColor}{RGB}{207,184,124}
+\definecolor{SecondaryColor}{RGB}{0,0,0}
+\definecolor{TertiaryColor}{RGB}{86,90,92}
+\definecolor{QuaternaryColor}{RGB}{162,164,163}
+
+% Apply color scheme
+\setbeamercolor{palette primary}{bg=PrimaryColor,fg=black}
+\setbeamercolor{palette secondary}{bg=TertiaryColor,fg=white}
+\setbeamercolor{palette tertiary}{bg=SecondaryColor,fg=PrimaryColor}
+\setbeamercolor{palette quaternary}{bg=PrimaryColor,fg=black}
+\setbeamercolor{structure}{fg=SecondaryColor}
+\setbeamercolor{section in toc}{fg=SecondaryColor}
+\setbeamercolor{subsection in head/foot}{bg=TertiaryColor,fg=white}
+
+% Title colors
+\setbeamercolor{title}{fg=PrimaryColor,bg=SecondaryColor}
+\setbeamercolor{frametitle}{fg=black,bg=PrimaryColor}
+
+% Block colors
+\setbeamercolor{block title}{bg=PrimaryColor,fg=black}
+\setbeamercolor{block body}{bg=QuaternaryColor!20,fg=black}
+
+% Alert block colors
+\setbeamercolor{block title alerted}{bg=SecondaryColor,fg=PrimaryColor}
+\setbeamercolor{block body alerted}{bg=TertiaryColor!20,fg=black}
+
+% Item colors
+\setbeamercolor{item}{fg=PrimaryColor}
+\setbeamercolor{subitem}{fg=TertiaryColor}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Configure listings to handle UTF-8
+\lstset{
+    inputencoding=utf8,
+    extendedchars=true,
+    literate=
+        {²}{{\textsuperscript{2}}}1
+        {³}{{\textsuperscript{3}}}1
+        {°}{{\textdegree}}1
+        {±}{{\textpm}}1
+        {×}{{\texttimes}}1
+        {÷}{{\textdiv}}1
+        {≤}{{$\leq$}}1
+        {≥}{{$\geq$}}1
+        {≠}{{$\neq$}}1
+        {∞}{{$\infty$}}1
+        {α}{{$\alpha$}}1
+        {β}{{$\beta$}}1
+        {γ}{{$\gamma$}}1
+        {δ}{{$\delta$}}1
+        {ε}{{$\epsilon$}}1
+        {λ}{{$\lambda$}}1
+        {μ}{{$\mu$}}1
+        {σ}{{$\sigma$}}1
+        {π}{{$\pi$}}1
+        {→}{{$\rightarrow$}}1
+        {←}{{$\leftarrow$}}1
+}
+
+% Define CODE macro for Python code
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{white},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    tabsize=4,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    escapeinside={(*@}{@*)},
+    xleftmargin=0.5cm,
+    xrightmargin=0.5cm,
+    inputencoding=utf8,
+    extendedchars=true
+}
+
+\lstset{style=pythonstyle}
+
+% CODE macro to include external Python files
+\newcommand{\CODE}[1]{\lstinputlisting{assets/code/#1}}
+
+% Title Information
+\title{Synthetic Brand Generation V2 - Enhanced with Ensemble Methods}
+\subtitle{University of Colorado Boulder - CSCA 5642: Introduction to Deep Learning}
+\author{Generation}
+\institute{University of Colorado Boulder}
+\date{\today}
+
+% Logo on title page
+\titlegraphic{\includegraphics[height=1.5cm]{assets/logos/cu_logo.svg}}
+
+% Footer customization
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\begin{document}
+
+% Title Slide
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Table of Contents
+\begin{frame}{Outline}
+    \tableofcontents
+\end{frame}
+
+
+\section{Synthetic Brand Generation V2 - Enhanced with Ensemble Methods}
+
+\begin{frame}{University of Colorado Boulder - CSCA 5642: Introduction to Deep Learning}
+\textbf{Dyego Fernandes de Sousa}\\
+\end{frame}
+
+
+\section{Problem Statement}
+
+\begin{frame}
+To showcase and demonstrate the application of \textbf{Generative Deep Learning} techniques for synthesizing realistic tabular data with associated text fields.
+This project is a continuation of my previous works on \textbf{Supervised Learning} and \textbf{Unsupervised Learning}, you can find more information in the appendix.
+\end{frame}
+
+\begin{frame}{Dataset Overview:}
+Detailed ESG (Environmenta Social and Governance) dataset to the brand-level
+Observations: 3605
+Features: 77
+\end{frame}
+
+\begin{frame}{Deliverables}
+1. \textbf{Generative Adversarial Networks (GANs)}: Implement and train CTGAN for mixed-type tabular data
+2. \textbf{Variational Autoencoders (VAEs)}: Apply TVAE as an alternative generative approach
+3. \textbf{Statistical Methods}: Integrate Gaussian Copula for correlation structure preservation
+4. \textbf{Large Language Models (LLMs)}: Fine-tune GPT-2 and Flan-T5 for conditional text generation
+5. \textbf{Ensemble Methods}: Combine multiple generators with optimized weighting
+6. \textbf{Evaluation Metrics}: Apply statistical tests (KS, correlation) to assess synthetic data quality
+\end{frame}
+
+
+\section{ML Approach & Architecture}
+
+\begin{frame}
+The following diagram illustrates the complete pipeline for synthetic brand data generation:
+\end{frame}
+
+\begin{frame}{Deep Learning Models Used}
+| Model | Type | Purpose | Key Features |
+|-------|------|---------|-------------|
+| \textbf{CTGAN} | Conditional GAN | Tabular synthesis | Mode-specific normalization, conditional vector |
+| \textbf{TVAE} | Variational Autoencoder | Distribution learning | KL divergence, latent space regularization |
+| \textbf{Gaussian Copula} | Statistical | Correlation preservation | Multivariate dependencies |
+| \textbf{GPT-2 Medium} | Transformer LLM | Brand name generation | 355M params, fine-tuned |
+| \textbf{Flan-T5 Small} | Encoder-Decoder | Conditional text gen | Instruction-following |
+\end{frame}
+
+\begin{frame}
+!\href{attachment:mermeid1.png}{mermeid1.png}
+\end{frame}
+
+\begin{frame}
+!\href{attachment:mermeid2.png}{mermeid2.png}
+\end{frame}
+
+\begin{frame}
+!\href{attachment:mermeid3.png}{mermeid3.png}
+\end{frame}
+
+
+\section{Phase 1: Setup & Installation}
+
+
+\begin{frame}[fragile]{Code: Cell 7}
+    \begin{figure}
+        \CODE{cell_007.py}
+        \caption{Code from Cell 7}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 8}
+    \begin{figure}
+        \CODE{cell_008.py}
+        \caption{Code from Cell 8}
+    \end{figure}
+\end{frame}
+
+
+\section{Configuration}
+
+
+\begin{frame}[fragile]{Code: Cell 10}
+    \begin{figure}
+        \CODE{cell_010.py}
+        \caption{Code from Cell 10}
+    \end{figure}
+\end{frame}
+
+
+\section{Phase 0: Hyperparameter Tuning (Optional)}
+
+\begin{frame}
+This phase uses Optuna to find optimal hyperparameters for the tabular synthesizers.
+Set \texttt{RUN\_HYPERPARAMETER\_TUNING = True} to run optimization, or use previously saved best parameters.
+\textbf{Tuned Parameters:}
+\begin{itemize}
+    \item \textbf{CTGAN/TVAE}: epochs, batch\_size, embedding\_dim, generator/discriminator dimensions
+    \item \textbf{Ensemble}: weights for each model
+    \item \textbf{Generation}: noise\_level, diversity\_temperature
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 12}
+    \begin{figure}
+        \CODE{cell_012.py}
+        \caption{Code from Cell 12}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 13}
+    \begin{figure}
+        \CODE{cell_013.py}
+        \caption{Code from Cell 13}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 14}
+    \begin{figure}
+        \CODE{cell_014.py}
+        \caption{Code from Cell 14}
+    \end{figure}
+\end{frame}
+
+
+\section{Phase 1: Data Preparation}
+
+
+\begin{frame}[fragile]{Code: Cell 16}
+    \begin{figure}
+        \CODE{cell_016.py}
+        \caption{Code from Cell 16}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 17}
+    \begin{figure}
+        \CODE{cell_017.py}
+        \caption{Code from Cell 17}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 18}
+    \begin{figure}
+        \CODE{cell_018.py}
+        \caption{Code from Cell 18}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 19}
+    \begin{figure}
+        \CODE{cell_019.py}
+        \caption{Code from Cell 19}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 20}
+    \begin{figure}
+        \CODE{cell_020.py}
+        \caption{Code from Cell 20}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_001.png}
+        \caption{Output from Cell 20}
+    \end{figure}
+\end{frame}
+
+
+\section{Phase 2: Tabular Ensemble Training}
+
+\begin{frame}
+Training CTGAN, TVAE, and Gaussian Copula models
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 22}
+    \begin{figure}
+        \CODE{cell_022.py}
+        \caption{Code from Cell 22}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 23}
+    \begin{figure}
+        \CODE{cell_023.py}
+        \caption{Code from Cell 23}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 24}
+    \begin{figure}
+        \CODE{cell_024.py}
+        \caption{Code from Cell 24}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 25}
+    \begin{figure}
+        \CODE{cell_025.py}
+        \caption{Code from Cell 25}
+    \end{figure}
+\end{frame}
+
+
+\section{Phase 3: LLM Ensemble Training}
+
+\begin{frame}
+Training GPT-2 Medium and Flan-T5 for brand name generation
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 27}
+    \begin{figure}
+        \CODE{cell_027.py}
+        \caption{Code from Cell 27}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 28}
+    \begin{figure}
+        \CODE{cell_028.py}
+        \caption{Code from Cell 28}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 29}
+    \begin{figure}
+        \CODE{cell_029.py}
+        \caption{Code from Cell 29}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 30}
+    \begin{figure}
+        \CODE{cell_030.py}
+        \caption{Code from Cell 30}
+    \end{figure}
+\end{frame}
+
+
+\section{Phase 4: Synthetic Data Generation}
+
+
+\begin{frame}[fragile]{Code: Cell 32}
+    \begin{figure}
+        \CODE{cell_032.py}
+        \caption{Code from Cell 32}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 33}
+    \begin{figure}
+        \CODE{cell_033.py}
+        \caption{Code from Cell 33}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 34}
+    \begin{figure}
+        \CODE{cell_034.py}
+        \caption{Code from Cell 34}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 35}
+    \begin{figure}
+        \CODE{cell_035.py}
+        \caption{Code from Cell 35}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 36}
+    \begin{figure}
+        \CODE{cell_036.py}
+        \caption{Code from Cell 36}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 37}
+    \begin{figure}
+        \CODE{cell_037.py}
+        \caption{Code from Cell 37}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 38}
+    \begin{figure}
+        \CODE{cell_038.py}
+        \caption{Code from Cell 38}
+    \end{figure}
+\end{frame}
+
+
+\section{Phase 5: Synthetic Data Quality Evaluation}
+
+\begin{frame}
+This phase comprehensively evaluates the quality of generated synthetic data through:
+1. \textbf{Statistical Fidelity}: Distribution matching (KS tests), correlation preservation
+2. \textbf{Visual Analysis}: Distribution overlays, QQ plots, feature comparisons
+3. \textbf{Dimensionality Reduction}: PCA and t-SNE projections
+4. \textbf{Summary Metrics}: Quality scorecards and radar charts
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 40}
+    \begin{figure}
+        \CODE{cell_040.py}
+        \caption{Code from Cell 40}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 41}
+    \begin{figure}
+        \CODE{cell_041.py}
+        \caption{Code from Cell 41}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 42}
+    \begin{figure}
+        \CODE{cell_042.py}
+        \caption{Code from Cell 42}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_002.png}
+        \caption{Output from Cell 42}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 43}
+    \begin{figure}
+        \CODE{cell_043.py}
+        \caption{Code from Cell 43}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_003.png}
+        \caption{Output from Cell 43}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 44}
+    \begin{figure}
+        \CODE{cell_044.py}
+        \caption{Code from Cell 44}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_004.png}
+        \caption{Output from Cell 44}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 45}
+    \begin{figure}
+        \CODE{cell_045.py}
+        \caption{Code from Cell 45}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_005.png}
+        \caption{Output from Cell 45}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile,allowframebreaks]{Code: Cell 46}
+    \begin{figure}
+        \CODE{cell_046.py}
+        \caption{Code from Cell 46}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_006.png}
+        \caption{Output from Cell 46}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile,allowframebreaks]{Code: Cell 47}
+    \begin{figure}
+        \CODE{cell_047.py}
+        \caption{Code from Cell 47}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_007.png}
+        \caption{Output from Cell 47}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile,allowframebreaks]{Code: Cell 48}
+    \begin{figure}
+        \CODE{cell_048.py}
+        \caption{Code from Cell 48}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_008.png}
+        \caption{Output from Cell 48}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile,allowframebreaks]{Code: Cell 49}
+    \begin{figure}
+        \CODE{cell_049.py}
+        \caption{Code from Cell 49}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Analysis Result}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{assets/figures/figure_009.png}
+        \caption{Output from Cell 49}
+    \end{figure}
+\end{frame}
+
+
+\section{Clean Up}
+
+
+\section{Conclusion}
+
+\begin{frame}{What Worked Well}
+1. \textbf{Ensemble Architecture for Tabular Data}
+\begin{itemize}
+    \item The combination of CTGAN, TVAE, and Gaussian Copula provided complementary strengths
+    \item TVAE showed the best individual performance (Mean KS: 0.11, 44\% pass rate) for distribution matching
+    \item Gaussian Copula excelled at preserving correlation structure (lowest Correlation MSE: 0.0197)
+    \item Dynamic weight optimization improved results by shifting weight toward TVAE (~54\%)
+\end{itemize}
+2. \textbf{Scalable Data Generation Pipeline}
+\begin{itemize}
+    \item Successfully generated 500 synthetic brand records with stratified company distribution
+    \item The pipeline supports conditional generation based on company characteristics
+    \item Model persistence to Google Drive enables iterative experimentation
+\end{itemize}
+3. \textbf{LLM Brand Name Generation}
+\begin{itemize}
+    \item 95.4\% success rate for unique brand name generation
+    \item GPT-2 Medium and Flan-T5 ensemble provided diverse naming suggestions
+    \item Memory-efficient sequential loading enabled running on standard GPU
+\end{itemize}
+4. \textbf{Correlation Structure Preservation}
+\begin{itemize}
+    \item Mean absolute correlation difference of 0.165 indicates reasonable preservation
+    \item PCA visualizations show synthetic data occupies similar feature space as original
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What Didn't Work Well}
+1. \textbf{Distribution Matching Challenges}
+\begin{itemize}
+    \item Only 29.2\% of features (7/24) passed the KS test for distribution similarity
+    \item Particularly poor performance on: \texttt{market\_cap\_billion\_usd} (KS=0.91), \texttt{employees} (KS=0.65), \texttt{greenwashing\_factors} (KS=0.50-0.62)
+    \item Heavy-tailed distributions and sparse features remain difficult for GANs
+\end{itemize}
+2. \textbf{Clustering Quality Degradation}
+\begin{itemize}
+    \item Silhouette score dropped from 0.713 (original) to 0.682 (augmented)
+    \item Davies-Bouldin score increased from 0.387 to 0.421 (worse)
+    \item Synthetic data may be introducing noise rather than enhancing cluster structure
+\end{itemize}
+3. \textbf{LLM Brand Name Quality Issues}
+\begin{itemize}
+    \item Some generated names are full sentences (e.g., "Nestle is a manufacturer of processed foods")
+    \item Competitor name leakage (e.g., "Procter \& Gamble" generated for Bayer)
+    \item Repetitive patterns with company name variations (e.g., "Nestle Foods", "Nestle, Inc")
+    \item 4.6\% fallback rate indicates generation failures
+\end{itemize}
+4. \textbf{Ensemble Aggregation Complexity}
+\begin{itemize}
+    \item Simple weighted averaging may not be optimal for combining diverse model outputs
+    \item The ensemble sometimes performed worse than individual models on certain metrics
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Future Enhancements}
+1. \textbf{Improved Tabular Synthesis}
+\begin{itemize}
+    \item Implement feature-specific preprocessing (log transforms for heavy-tailed distributions)
+    \item Use conditional generation with explicit constraints for bounded features
+    \item Explore TabDDPM (diffusion models) as an alternative to GAN-based methods
+    \item Add post-processing validation to clip unrealistic values
+\end{itemize}
+2. \textbf{Enhanced LLM Brand Generation}
+\begin{itemize}
+    \item Fine-tune with negative examples to prevent competitor name generation
+    \item Implement stricter output validation and filtering
+    \item Use retrieval-augmented generation (RAG) with brand name databases
+    \item Add style conditioning for different brand naming conventions (descriptive, invented, founder-based)
+\end{itemize}
+3. \textbf{Better Evaluation Metrics}
+\begin{itemize}
+    \item Implement Machine Learning Efficacy tests (train on synthetic, test on real)
+    \item Add privacy metrics (nearest neighbor distance, membership inference)
+    \item Use domain-specific validity checks for brand attributes
+\end{itemize}
+4. \textbf{Hyperparameter Optimization}
+\begin{itemize}
+    \item Extend Optuna tuning to LLM generation parameters (temperature, top\_p, top\_k)
+    \item Implement multi-objective optimization balancing distribution matching and correlation preservation
+    \item Add early stopping based on validation metrics during training
+\end{itemize}
+5. \textbf{Architecture Improvements}
+\begin{itemize}
+    \item Implement attention-based tabular models (TabTransformer, FT-Transformer)
+    \item Use hierarchical generation: company → industry → brand attributes → brand name
+    \item Add discriminator-based filtering to reject low-quality synthetic samples
+\end{itemize}
+\end{frame}
+
+
+\section{References & Bibliography}
+
+\begin{frame}{Synthetic Data Generation}
+1. \textbf{CTGAN (Conditional Tabular GAN)}
+\begin{itemize}
+    \item Xu, L., Skoularidou, M., Cuesta-Infante, A., \& Veeramachaneni, K. (2019). \textit{Modeling Tabular Data using Conditional GAN}. NeurIPS 2019.
+    \item Paper: https://arxiv.org/abs/1907.00503
+    \item Implementation: \href{https://github.com/sdv-dev/SDV}{SDV Library}
+\end{itemize}
+2. \textbf{TVAE (Tabular Variational Autoencoder)}
+\begin{itemize}
+    \item Xu, L., Skoularidou, M., Cuesta-Infante, A., \& Veeramachaneni, K. (2019). \textit{Modeling Tabular Data using Conditional GAN}. NeurIPS 2019.
+    \item Part of the same paper as CTGAN, presenting VAE-based alternative
+\end{itemize}
+3. \textbf{Gaussian Copula}
+\begin{itemize}
+    \item Patki, N., Wedge, R., \& Veeramachaneni, K. (2016). \textit{The Synthetic Data Vault}. IEEE DSAA 2016.
+    \item Paper: https://dai.lids.mit.edu/wp-content/uploads/2018/03/SDV.pdf
+\end{itemize}
+4. \textbf{SDV (Synthetic Data Vault) Library}
+\begin{itemize}
+    \item Documentation: https://docs.sdv.dev/sdv/
+    \item GitHub: https://github.com/sdv-dev/SDV
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Language Models for Text Generation}
+5. \textbf{GPT-2}
+\begin{itemize}
+    \item Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., \& Sutskever, I. (2019). \textit{Language Models are Unsupervised Multitask Learners}. OpenAI.
+    \item Paper: https://cdn.openai.com/better-language-models/language\_models\_are\_unsupervised\_multitask\_learners.pdf
+\end{itemize}
+6. \textbf{Flan-T5}
+\begin{itemize}
+    \item Chung, H. W., et al. (2022). \textit{Scaling Instruction-Finetuned Language Models}. arXiv preprint.
+    \item Paper: https://arxiv.org/abs/2210.11416
+\end{itemize}
+7. \textbf{Hugging Face Transformers}
+\begin{itemize}
+    \item Wolf, T., et al. (2020). \textit{Transformers: State-of-the-Art Natural Language Processing}. EMNLP 2020.
+    \item Documentation: https://huggingface.co/docs/transformers/
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation Metrics}
+8. \textbf{Kolmogorov-Smirnov Test}
+\begin{itemize}
+    \item Massey Jr, F. J. (1951). \textit{The Kolmogorov-Smirnov test for goodness of fit}. Journal of the American Statistical Association, 46(253), 68-78.
+\end{itemize}
+9. \textbf{Silhouette Score}
+\begin{itemize}
+    \item Rousseeuw, P. J. (1987). \textit{Silhouettes: a graphical aid to the interpretation and validation of cluster analysis}. Journal of Computational and Applied Mathematics, 20, 53-65.
+\end{itemize}
+10. \textbf{Davies-Bouldin Index}
+\begin{itemize}
+    \item Davies, D. L., \& Bouldin, D. W. (1979). \textit{A cluster separation measure}. IEEE Transactions on Pattern Analysis and Machine Intelligence, (2), 224-227.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Hyperparameter Optimization}
+11. \textbf{Optuna}
+\begin{itemize}
+    \item Akiba, T., Sano, S., Yanase, T., Ohta, T., \& Koyama, M. (2019). \textit{Optuna: A Next-generation Hyperparameter Optimization Framework}. KDD 2019.
+    \item Paper: https://arxiv.org/abs/1907.10902
+    \item Documentation: https://optuna.org/
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Related Work on Tabular Data Synthesis}
+12. \textbf{TabDDPM (Diffusion Models for Tabular Data)}
+\begin{itemize}
+    \item Kotelnikov, A., Baranchuk, D., Rubachev, I., \& Babenko, A. (2023). \textit{TabDDPM: Modelling Tabular Data with Diffusion Models}. ICML 2023.
+    \item Paper: https://arxiv.org/abs/2209.15421
+\end{itemize}
+13. \textbf{CTAB-GAN+}
+\begin{itemize}
+    \item Zhao, Z., Kunar, A., Birke, R., \& Chen, L. Y. (2022). \textit{CTAB-GAN+: Enhancing Tabular Data Synthesis}. arXiv preprint.
+    \item Paper: https://arxiv.org/abs/2204.00401
+\end{itemize}
+14. \textbf{Synthetic Data Generation Survey}
+\begin{itemize}
+    \item Jordon, J., Yoon, J., \& van der Schaar, M. (2022). \textit{Synthetic Data - what, why and how?} arXiv preprint.
+    \item Paper: https://arxiv.org/abs/2205.03257
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Software & Tools}
+\begin{itemize}
+    \item \textbf{Python}: https://www.python.org/
+    \item \textbf{PyTorch}: https://pytorch.org/
+    \item \textbf{Pandas}: https://pandas.pydata.org/
+    \item \textbf{Scikit-learn}: https://scikit-learn.org/
+    \item \textbf{Matplotlib}: https://matplotlib.org/
+    \item \textbf{Seaborn}: https://seaborn.pydata.org/
+    \item \textbf{Google Colab}: https://colab.research.google.com/
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Code: Cell 53}
+    \begin{figure}
+        \CODE{cell_053.py}
+        \caption{Code from Cell 53}
+    \end{figure}
+\end{frame}
+
+
+\section{Appendix - Mermeid Code}
+
+\begin{frame}
+\texttt{}`mermaid
+flowchart TB
+    subgraph INPUT["📊 Input Data"]
+        A[(Brand Dataset<br/>CSV)] --> B[Data Processor]
+    end
+    subgraph PREPROCESS["🔧 Preprocessing"]
+        B --> C[Clean \& Validate]
+        C --> D[Feature Engineering]
+        D --> E[Train/Test Split]
+    end
+    subgraph TABULAR["🎲 Tabular Data Generation"]
+        E --> F1[CTGAN<br/>Conditional GAN]
+        E --> F2[TVAE<br/>Variational Autoencoder]
+        E --> F3[Gaussian Copula<br/>Statistical Model]
+        F1 --> G[Ensemble<br/>Weighted Averaging]
+        F2 --> G
+        F3 --> G
+    end
+    subgraph TEXT["📝 Text Generation"]
+        G --> H1[GPT-2 Medium<br/>Fine-tuned LLM]
+        G --> H2[Flan-T5 Small<br/>Instruction-tuned]
+        H1 --> I[Text Ensemble<br/>Best Selection]
+        H2 --> I
+    end
+    subgraph OUTPUT["✅ Output"]
+        I --> J[Synthetic Brands<br/>with Names]
+        J --> K[Quality Evaluation]
+    end
+    subgraph EVAL["📈 Evaluation Metrics"]
+        K --> L1[KS Test]
+        K --> L2[Correlation]
+        K --> L3[PCA/t-SNE]
+        K --> L4[Clustering]
+    end
+    style INPUT fill:\#e1f5fe
+    style PREPROCESS fill:\#fff3e0
+    style TABULAR fill:\#f3e5f5
+    style TEXT fill:\#e8f5e9
+    style OUTPUT fill:\#fce4ec
+    style EVAL fill:\#fff8e1
+\texttt{}`
+\end{frame}
+
+\begin{frame}{Ensemble Strategy}
+\texttt{}`mermaid
+flowchart LR
+    subgraph ENSEMBLE["Ensemble Weighting"]
+        direction TB
+        W1["CTGAN: 40\%"] --> MIX((Weighted<br/>Average))
+        W2["TVAE: 35\%"] --> MIX
+        W3["Copula: 25\%"] --> MIX
+        MIX --> OUT[Synthetic Data]
+    end
+    style ENSEMBLE fill:\#f5f5f5
+    style MIX fill:\#4caf50,color:\#fff
+\texttt{}`
+\end{frame}
+
+\begin{frame}{Training Pipeline}
+\texttt{}`mermaid
+sequenceDiagram
+    participant D as Dataset
+    participant P as Processor
+    participant T as Tabular Models
+    participant L as LLM Models
+    participant E as Evaluator
+    D->>P: Load brand\_information.csv
+    P->>P: Clean \& preprocess
+    P->>T: Training data
+    par Train in Parallel
+        T->>T: Train CTGAN (300 epochs)
+        T->>T: Train TVAE (300 epochs)
+        T->>T: Fit Gaussian Copula
+    end
+    T->>T: Generate synthetic tabular
+    T->>L: Tabular features
+    par Generate Names
+        L->>L: GPT-2 generation
+        L->>L: Flan-T5 generation
+    end
+    L->>E: Complete synthetic data
+    E->>E: Statistical tests
+    E->>E: Visualization
+\texttt{}`
+\end{frame}
+
+
+\section{Tools & Libraries Used}
+
+\begin{frame}{Core Deep Learning & ML Frameworks}
+\begin{itemize}
+    \item \textbf{PyTorch} - Deep learning framework powering the neural network components of CTGAN and TVAE synthesizers
+    \item \textbf{Scikit-learn} - Machine learning utilities for PCA, t-SNE, clustering (AgglomerativeClustering), and evaluation metrics (silhouette score, Davies-Bouldin index)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Synthetic Data Generation}
+\begin{itemize}
+    \item \textbf{SDV (Synthetic Data Vault)} - Primary library for tabular synthetic data generation, providing:
+    \item \textbf{CTGAN} - Conditional Tabular GAN for generating realistic tabular data
+    \item \textbf{TVAE} - Tabular Variational Autoencoder for distribution-preserving synthesis
+    \item \textbf{Gaussian Copula} - Statistical model capturing feature dependencies
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Natural Language Generation}
+\begin{itemize}
+    \item \textbf{Hugging Face Transformers} - State-of-the-art NLP library for text generation using pre-trained language models
+    \item \textbf{PEFT (Parameter-Efficient Fine-Tuning)} - Efficient fine-tuning techniques for large language models
+    \item \textbf{BitsAndBytes} - 8-bit quantization for memory-efficient model loading
+    \item \textbf{Accelerate} - Distributed training and mixed precision utilities
+    \item \textbf{SentencePiece} - Tokenization library for handling text preprocessing
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Hyperparameter Optimization}
+\begin{itemize}
+    \item \textbf{Optuna} - Automated hyperparameter tuning framework using Bayesian optimization for finding optimal model configurations
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Data Processing & Analysis}
+\begin{itemize}
+    \item \textbf{Pandas} - Data manipulation and analysis
+    \item \textbf{NumPy} - Numerical computing and array operations
+    \item \textbf{SciPy} - Statistical tests (Kolmogorov-Smirnov test) for distribution comparison
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Visualization}
+\begin{itemize}
+    \item \textbf{Matplotlib} - Core plotting library for creating figures
+    \item \textbf{Seaborn} - Statistical data visualization with enhanced aesthetics
+    \item \textbf{Plotly} - Interactive visualizations (if used)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Environment & Infrastructure}
+\begin{itemize}
+    \item \textbf{Google Colab} - Cloud-based Jupyter notebook environment with GPU support
+    \item \textbf{Google Drive} - Persistent storage for models and outputs
+\end{itemize}
+\end{frame}
+
+
+
+\end{document}
