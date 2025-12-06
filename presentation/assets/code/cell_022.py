@@ -9,8 +9,3 @@ tabular_ensemble = EnsembleSynthesizer(
     verbose=True,
     cuda=True
 )
-
-print("Tabular Ensemble initialized with:")
-print(f"  - CTGAN (epochs={CTGAN_EPOCHS})")
-print(f"  - TVAE (epochs={TVAE_EPOCHS})")
-print(f"  - Gaussian Copula (distribution=beta)")

@@ -4,5 +4,3 @@ llm_generator = BrandNameGeneratorV2(
     memory_efficient=True,
     verbose=True
 )
-
-print(f"LLM Ensemble initialized with models: {LLM_MODELS}")
