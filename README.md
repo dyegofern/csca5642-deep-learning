@@ -1,44 +1,48 @@
-# Synthetic Brand Generation with GANs
+# Synthetic Brand Generation with Deep Learning
 
-Deep Learning Final Project - Addressing Class Imbalance in Brand Clustering using Generative Models
+University of Colorado Boulder - CSCA 5642: Introduction to Deep Learning
+
+**Author**: Dyego Fernandes de Sousa
 
 ## Project Overview
 
-This project tackles severe class imbalance in hierarchical clustering of ESG (Environmental, Social, and Governance) brand data by generating synthetic brands using state-of-the-art generative models. The original unsupervised learning analysis produced only 2 clusters (with one containing a single brand), indicating poor cluster balance.
+This project tackles class imbalance in hierarchical clustering of ESG (Environmental, Social, and Governance) brand data by generating synthetic brands using an ensemble of generative models. The solution combines tabular synthesizers with Large Language Models for complete brand generation.
 
-### Solution: Hybrid GAN Approach
+### Solution: Hybrid Ensemble Approach
 
-1. **CTGAN** (Conditional Tabular GAN): Generates realistic brand features (ESG metrics, demographics, business characteristics)
-2. **DistilGPT2** (Fine-tuned): Generates realistic brand names conditioned on company and industry
+**Tabular Data Generation** (Ensemble of 3 models):
+1. **CTGAN** (Conditional Tabular GAN): Generator/Discriminator for tabular features
+2. **TVAE** (Tabular Variational Autoencoder): Encoder/Decoder for distribution learning
+3. **Gaussian Copula**: Statistical method for correlation preservation
+
+**Brand Name Generation** (LLM Ensemble):
+1. **GPT-2 Medium** (355M params): Fine-tuned for brand name generation
+2. **Flan-T5 Base**: Instruction-following encoder-decoder model
 
 ## Dataset
 
 - **Source**: `data/raw/brand_information.csv`
-- **Size**: 3,605 brands across multiple industries
-- **Features**: 80+ columns including:
-  - ESG metrics (greenwashing levels, emissions, sustainability awards)
-  - Demographics (age groups, income levels, lifestyle segments)
-  - Business model characteristics (franchises, online sales, fleet info)
-  - Financial data (revenues, market cap, R&D spend)
+- **Size**: 3,605 brands, 77 features
+- **Features**: ESG metrics, demographics, business characteristics, financial data
 
 ## Project Structure
 
 ```
-final_idea_2/
+csca5642-deep-learning/
 ├── src/
-│   ├── __init__.py                 # Module initialization
 │   ├── data_processor.py           # Data loading and preprocessing
-│   ├── tabular_gan.py             # CTGAN wrapper for tabular features
-│   ├── brand_name_generator.py    # DistilGPT2 for brand name generation
-│   └── evaluator.py               # Evaluation and visualization
+│   ├── tabular_gan_v2.py           # Ensemble synthesizers (CTGAN, TVAE, Gaussian Copula)
+│   ├── brand_name_generator_v2.py  # LLM ensemble (GPT-2, Flan-T5)
+│   ├── hyperparameter_tuner_v2.py  # Optuna-based hyperparameter optimization
+│   └── evaluator.py                # Evaluation and visualization
 ├── notebooks/
-│   └── synthetic_brand_generation.ipynb  # Main pipeline notebook
+│   └── synthetic_brand_generation_v2.ipynb  # Main pipeline notebook
+├── presentation/
+│   └── presentation.pdf            # Project presentation
 ├── data/
-│   ├── raw/                       # Original datasets
-│   └── generated/                 # Synthetic and augmented datasets
-├── models/                        # Trained model checkpoints
-├── final_idea2.md                 # Project plan and methodology
-└── README.md                      # This file
+│   ├── raw/                        # Original datasets
+│   └── generated/                  # Synthetic and augmented datasets
+└── models/                         # Trained model checkpoints
 ```
 
 ## Requirements
@@ -46,225 +50,147 @@ final_idea_2/
 ### Core Libraries
 
 ```bash
-pip install sdv transformers torch pandas numpy scikit-learn matplotlib seaborn plotly scipy
+pip install sdv transformers torch pandas numpy scikit-learn matplotlib seaborn scipy optuna
 ```
 
-- **sdv** (v1.x): Synthetic Data Vault (includes CTGAN, TVAE, CopulaGAN)
-- **transformers**: HuggingFace for GPT-2/DistilGPT2
+- **sdv** (v1.x): Synthetic Data Vault (CTGAN, TVAE, GaussianCopula)
+- **transformers**: HuggingFace for GPT-2 and Flan-T5
 - **torch**: PyTorch backend
+- **optuna**: Hyperparameter optimization
 - **scikit-learn**: Clustering and metrics
-- **pandas/numpy**: Data manipulation
-- **matplotlib/seaborn/plotly**: Visualization
-- **scipy**: Statistical tests
 
 ### System Requirements
 
-- **For Colab**: Free tier with T4 GPU (12-15GB RAM)
-- **For Local**: 16GB+ RAM, CUDA-compatible GPU recommended
+- **Google Colab**: T4 GPU recommended (12-15GB RAM)
 - **Python**: 3.8+
-
-## Usage
-
-### Quick Start (Jupyter Notebook)
-
-1. **Open the main notebook**:
-   ```
-   notebooks/synthetic_brand_generation.ipynb
-   ```
-
-2. **For Google Colab**:
-   - Upload the notebook to Colab
-   - Enable GPU runtime (Runtime > Change runtime type > GPU)
-   - Upload `data/raw/brand_information.csv` or mount Google Drive
-   - Run all cells
-
-3. **For Local Jupyter**:
-   ```bash
-   jupyter notebook notebooks/synthetic_brand_generation.ipynb
-   ```
-
-### Using the Python Classes
-
-```python
-from src.data_processor import BrandDataProcessor
-from src.tabular_gan import TabularBrandGAN
-from src.brand_name_generator import BrandNameGenerator
-from src.evaluator import BrandDataEvaluator
-
-# 1. Load and preprocess data
-processor = BrandDataProcessor('data/raw/brand_information.csv')
-train_df, val_df = processor.prepare_for_gan()
-
-# 2. Train CTGAN
-ctgan = TabularBrandGAN(epochs=300, batch_size=500)
-ctgan.train(train_df)
-
-# 3. Fine-tune brand name generator
-name_gen = BrandNameGenerator(model_name='distilgpt2')
-name_gen.fine_tune(brands_df, epochs=3)
-
-# 4. Generate synthetic brands
-synthetic = ctgan.generate_for_companies(companies=['PepsiCo, Inc.'], n_per_company=10)
-synthetic_with_names = name_gen.generate_for_dataframe(synthetic)
-
-# 5. Evaluate
-evaluator = BrandDataEvaluator()
-comparison = evaluator.compare_clustering(original_data, augmented_data, numerical_cols)
-evaluator.plot_comprehensive_evaluation(...)
-```
 
 ## Pipeline Phases
 
-### Phase 1: Data Preparation & Exploration
+### Phase 0: Hyperparameter Tuning (Optional)
 
-- Load brand dataset (3,605 brands, 80+ features)
-- Explore brand distribution per company
-- Handle missing values
-- Encode categorical features
+Uses Optuna to find optimal hyperparameters for tabular synthesizers:
+- CTGAN/TVAE epochs, batch size, embedding dimensions
+- Ensemble weights optimization
+- Best parameters saved to JSON
+
+### Phase 1: Data Preparation
+
+- Load brand dataset (3,605 brands, 77 features)
+- Handle missing values and encode categorical features
 - Train/validation split (stratified by company)
 
-### Phase 2: CTGAN Training
+### Phase 2: Tabular Ensemble Training
 
-- Initialize CTGAN with appropriate hyperparameters
-- Train on preprocessed brand features
-- Condition on `company_name` for realistic generation
-- Save model checkpoint
+Train three models with optimized weights:
+- **CTGAN** (~10.8% weight): Mode-specific normalization, conditional vector
+- **TVAE** (~58% weight): KL divergence, latent space regularization
+- **Gaussian Copula** (~31.2% weight): Multivariate dependencies
 
-**Training Time**: 20-40 minutes on GPU (depending on epochs)
+**Training Time**: 20-40 minutes on GPU
 
-### Phase 3: Brand Name Generation
+### Phase 3: LLM Ensemble Training
 
-- Fine-tune DistilGPT2 on existing brand names
-- Format: `"Company: {company} | Industry: {industry} | Brand: {name}"`
-- Learn company-specific naming patterns
-- Save fine-tuned model
+Fine-tune language models for brand name generation:
+- **GPT-2 Medium**: Causal language modeling
+- **Flan-T5 Base**: Sequence-to-sequence with instruction tuning
+
+Format: `"Company: {company} | Industry: {industry} | Brand: {name}"`
 
 **Training Time**: 10-30 minutes on GPU
 
 ### Phase 4: Synthetic Data Generation
 
-- Identify companies needing more brands
-- Generate synthetic features using CTGAN
-- Generate brand names using DistilGPT2
+- Generate synthetic features using tabular ensemble (weighted average for numerical, majority voting for categorical)
+- Generate brand names using LLM ensemble with quality-weighted voting
 - Combine into complete synthetic brands
-- Save: `data/generated/synthetic_brands.csv`
 
-### Phase 5: Evaluation & Validation
+### Phase 5: Evaluation
 
 **Statistical Validation**:
 - Kolmogorov-Smirnov tests (distribution similarity)
-- Correlation preservation analysis
-- Chi-square tests for categorical features
+- Correlation preservation analysis (MSE: 0.0197)
 
-**Clustering Evaluation**:
-- Re-run hierarchical clustering on augmented dataset
-- Metrics: Silhouette score, Davies-Bouldin index
-- Cluster balance improvement
+**Metrics Achieved**:
+- Mean KS Statistic: 0.286
+- LLM Success Rate: 95.4%
+- Overall Score: 0.240
 
 **Visualizations**:
-- Distribution comparisons (histograms, KDE plots)
-- PCA/t-SNE scatter plots (original vs synthetic)
-- Dendrogram comparisons (before/after)
-- Silhouette analysis plots
+- Distribution comparisons (histograms, KDE, QQ plots)
+- PCA/t-SNE dimensionality reduction
 - Correlation heatmaps
-- Comprehensive 9-panel evaluation figure
+- Quality scorecards and radar charts
 
-## Key Features
+## Usage
 
-### Academic-Quality Visualizations
+### Quick Start (Google Colab)
 
-The `evaluator.py` module includes extensive visualization functions for academic presentations:
+1. Open `notebooks/synthetic_brand_generation_v2.ipynb` in Colab
+2. Enable GPU runtime (Runtime > Change runtime type > GPU)
+3. Mount Google Drive for model persistence
+4. Run all cells
 
-- `plot_dendrogram()`: Hierarchical clustering tree
-- `plot_dendrogram_comparison()`: Side-by-side dendrogram comparison
-- `plot_silhouette_analysis()`: Per-cluster silhouette scores
-- `plot_tsne_comparison()`: t-SNE dimensionality reduction
-- `plot_feature_importance_pca()`: PCA loadings and variance
-- `plot_metric_comparison_bars()`: Clustering metric comparison
-- `plot_cluster_size_distribution()`: Cluster balance visualization
-- `plot_comprehensive_evaluation()`: 9-panel publication-ready figure
+### Using the Python Classes
 
-### Modular Design
+```python
+from data_processor import BrandDataProcessor
+from tabular_gan_v2 import EnsembleSynthesizer, CTGANSynthesizerWrapper, TVAESynthesizerWrapper, GaussianCopulaSynthesizerWrapper
+from brand_name_generator_v2 import BrandNameGeneratorV2
+from evaluator import BrandDataEvaluator
 
-All functionality is organized into clean, reusable Python classes:
+# 1. Load and preprocess data
+processor = BrandDataProcessor('data/raw/brand_information.csv')
+train_df, val_df = processor.prepare_for_gan()
 
-- **BrandDataProcessor**: Complete data pipeline (load, clean, encode, split)
-- **TabularBrandGAN**: CTGAN training and generation
-- **BrandNameGenerator**: GPT-2 fine-tuning and name generation
-- **BrandDataEvaluator**: Comprehensive evaluation and visualization
+# 2. Train Tabular Ensemble
+tabular_ensemble = EnsembleSynthesizer(
+    ctgan_wrapper=CTGANSynthesizerWrapper(...),
+    tvae_wrapper=TVAESynthesizerWrapper(...),
+    gc_wrapper=GaussianCopulaSynthesizerWrapper(...),
+    weights={'ctgan': 0.108, 'tvae': 0.580, 'gaussian_copula': 0.312}
+)
+tabular_ensemble.fit(train_df)
 
-### Google Colab Optimized
+# 3. Train LLM Ensemble
+llm_generator = BrandNameGeneratorV2(models=['gpt2-medium', 'flan-t5-base'])
+llm_generator.fine_tune_all(brands_df)
 
-- Memory-efficient processing (batch operations)
-- Mixed precision training (fp16)
-- Model checkpointing to Google Drive
-- Fallback to CPU if GPU unavailable
-- Clear progress indicators
+# 4. Generate synthetic brands
+synthetic_features = tabular_ensemble.sample(n=100)
+synthetic_with_names = llm_generator.generate_for_dataframe(synthetic_features)
 
-## Expected Outcomes
-
-1. **Synthetic Brands**: 500-1000 realistic synthetic brands
-2. **Improved Clustering**: Better cluster balance (more than 2 clusters)
-3. **Quality Metrics**: Statistical similarity to original data
-4. **Trained Models**:
-   - CTGAN model (`.pkl`)
-   - DistilGPT2 brand name generator (HuggingFace format)
-
-## Evaluation Metrics
-
-### Clustering Quality
-- **Silhouette Score**: Measures cluster cohesion (higher is better)
-- **Davies-Bouldin Index**: Measures cluster separation (lower is better)
-- **Cluster Balance**: Distribution of samples across clusters
-
-### Synthetic Data Quality
-- **KS Statistic**: Distribution similarity (p > 0.05 is good)
-- **Correlation Preservation**: Maintain feature relationships
-- **Privacy**: Ensure synthetic brands are sufficiently different from originals
-
-## Troubleshooting
-
-### Common Issues
-
-**Out of Memory (OOM)**:
-- Reduce `batch_size` (CTGAN: 500→256, GPT-2: 8→4)
-- Use `distilgpt2` instead of `gpt2`
-- Clear cache: `torch.cuda.empty_cache()`
-
-**SDV Installation Issues**:
-- Use: `pip install sdv==1.2.0` (specific version)
-- If dependency conflicts, create fresh virtual environment
-
-**Colab Session Timeout**:
-- Save checkpoints frequently to Google Drive
-- Use `model.save()` after training phases
-- Can resume from saved models
-
-## Citation
-
-If you use this code for academic work, please cite:
-
+# 5. Evaluate
+evaluator = BrandDataEvaluator()
+evaluator.compare_distributions(original_df, synthetic_df)
 ```
-Synthetic Brand Generation with GANs
-Deep Learning Final Project
-[Your Name], [Year]
-```
+
+## Results Summary
+
+| Category | Topic | Details |
+|----------|-------|---------|
+| **What Worked** | Ensemble Architecture | CTGAN, TVAE, GC complemented; TVAE ~54% weight (KS: 0.11), GC preserved correlations (MSE: 0.0197) |
+| | Scalable Pipeline | Stratified generation, conditional synthesis, Google Drive persistence |
+| | LLM Brand Names | GPT-2 + Flan-T5 achieved 95.4% success rate, memory-efficient |
+| **Challenges** | LLM Quality Issues | Full sentences, competitor leakage, repetitive patterns, 4.6% fallback |
+| **Future Work** | Tabular Synthesis | Feature preprocessing, constrained generation, TabDDPM, validation |
+| | LLM Enhancement | Negative examples, stricter validation, RAG, style conditioning |
+| | Architecture | Attention-based models, hierarchical pipeline, discriminator filtering |
 
 ## References
 
-- **CTGAN**: "Modeling Tabular Data using Conditional GAN" (Xu et al., 2019)
+- **CTGAN**: Xu, L., et al. (2019). *Modeling Tabular Data using Conditional GAN*. NeurIPS 2019.
+- **TVAE**: Same authors, variational approach for tabular data.
+- **Gaussian Copula**: Statistical method for modeling dependencies.
+- **GPT-2**: Radford, A., et al. (2019). *Language Models are Unsupervised Multitask Learners*.
+- **Flan-T5**: Chung, H.W., et al. (2022). *Scaling Instruction-Finetuned Language Models*.
 - **SDV**: Synthetic Data Vault - https://sdv.dev/
-- **DistilGPT2**: "DistilBERT, a distilled version of BERT" (Sanh et al., 2019)
-- **HuggingFace Transformers**: https://huggingface.co/
+- **Optuna**: Akiba, T., et al. (2019). *Optuna: A Next-generation Hyperparameter Optimization Framework*.
+
+## Links
+
+- **GitHub**: https://github.com/dyegofern/csca5642-deep-learning
+- **Presentation**: [presentation/presentation.pdf](presentation/presentation.pdf)
 
 ## License
 
 This project is for academic purposes.
-
-## Contact
-
-For questions or issues, please refer to the documentation in `final_idea2.md` or check the inline comments in the code.
-
----
-
-**Note**: This is an academic project demonstrating the application of generative models to address data imbalance in unsupervised learning scenarios.
